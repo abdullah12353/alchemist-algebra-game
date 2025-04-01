@@ -1,0 +1,53 @@
+/* src/components/Ingredient.module.css */
+.ingredientWrapper {
+  margin: 0.25rem; /* 4px */
+  padding: 0.5rem; /* 8px */
+  border-radius: 9999px; /* Full round */
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--color-text-dark); /* Dark text on colored background */
+  font-weight: 700;
+  position: relative; /* Needed for potential absolute elements inside */
+  min-height: 3rem; /* 48px */
+  min-width: 3rem; /* 48px */
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease-out; /* Add transition for hover/active */
+}
+
+/* Add hover effect */
+.ingredientWrapper:hover {
+    transform: scale(1.05);
+}
+
+.ingredientContent {
+  display: flex;
+  align-items: center;
+  padding: 0 0.25rem; /* 4px */
+}
+
+.sign {
+  font-size: 1.125rem; /* 18px */
+  margin-right: 0.1rem;
+  font-family: sans-serif; /* Use sans-serif for symbols/numbers */
+}
+
+.coefficient {
+  font-size: 0.875rem; /* 14px */
+  margin-right: 0.1rem;
+  font-family: sans-serif;
+  font-weight: 600;
+}
+
+.symbol {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1; /* Prevent extra space */
+}
+
+/* Background colors based on ingredient type */
+.bgStoneGold { background-color: var(--color-stone-gold); }
+.bgGlowShroom { background-color: var(--color-glow-shroom); }
+.bgMoonDew { background-color: var(--color-moon-dew); }
+/* Add more as needed */

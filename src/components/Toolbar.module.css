@@ -1,0 +1,124 @@
+/* src/components/Toolbar.module.css */
+.toolbarWrapper {
+  background-color: rgba(31, 41, 55, 0.7); /* bg-gray-800 with opacity */
+  backdrop-filter: blur(4px); /* Apply blur */
+  padding: 0.75rem 1rem; /* 12px 16px */
+  border-radius: 0.5rem; /* 8px */
+  box-shadow: var(--shadow-lg);
+  margin: 1rem 0;
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem 1rem; /* Row gap, Column gap */
+  border: 1px solid var(--color-amber-800, #92400e); /* Fallback color */
+  width: 100%;
+  max-width: 56rem; /* max-w-4xl */
+}
+
+.operationGroup {
+  display: flex;
+  flex-direction: column; /* Stack input and buttons vertically on small screens */
+  align-items: center; /* Center items */
+  border: 1px solid #4b5563; /* border-gray-600 */
+  border-radius: 0.375rem; /* 6px */
+  padding: 0.5rem; /* 8px */
+  gap: 0.25rem; /* Gap between input and button row */
+}
+
+/* Adjust layout for slightly larger screens */
+@media (min-width: 640px) { /* sm breakpoint */
+   .operationGroup {
+       flex-direction: row; /* Row layout */
+       gap: 0.5rem; /* Increase gap */
+   }
+}
+
+
+.inputField {
+  background-color: #111827; /* bg-gray-900 */
+  color: var(--color-text-light);
+  padding: 0.5rem; /* 8px */
+  border-radius: 0.25rem; /* 4px */
+  width: 6rem; /* w-24 */
+  text-align: center;
+  border: 1px solid transparent; /* Placeholder for focus */
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: var(--color-stone-gold);
+  box-shadow: 0 0 0 1px var(--color-stone-gold);
+}
+
+.inputField:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 0.25rem; /* Gap between buttons */
+}
+
+
+/* Base Button Styles */
+.button {
+  padding: 0.5rem 0.75rem; /* 8px 12px */
+  border-radius: 0.375rem; /* 6px */
+  box-shadow: var(--shadow-sm);
+  font-weight: 600;
+  transition: background-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* Gap between icon and text */
+  font-size: 0.875rem; /* 14px */
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.buttonIcon {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1; /* Prevent extra space */
+}
+
+/* Specific Button Colors */
+.buttonAdd {
+  background-color: #15803d; /* bg-green-700 */
+  color: var(--color-button-text-light);
+}
+.buttonAdd:hover:not(:disabled) { background-color: #16a34a; } /* bg-green-600 */
+
+.buttonSubtract {
+  background-color: #b91c1c; /* bg-red-700 */
+  color: var(--color-button-text-light);
+}
+.buttonSubtract:hover:not(:disabled) { background-color: #dc2626; } /* bg-red-600 */
+
+.buttonMultiply {
+  background-color: #1d4ed8; /* bg-blue-700 */
+  color: var(--color-button-text-light);
+}
+.buttonMultiply:hover:not(:disabled) { background-color: #2563eb; } /* bg-blue-600 */
+
+.buttonDivide {
+  background-color: #d97706; /* bg-yellow-700 */
+  color: var(--color-button-text-dark); /* Dark text on yellow */
+}
+.buttonDivide:hover:not(:disabled) { background-color: #f59e0b; } /* bg-yellow-600 */
+
+.buttonUndo {
+  background-color: #4b5563; /* bg-gray-600 */
+  color: var(--color-button-text-light);
+}
+.buttonUndo:hover:not(:disabled) { background-color: #6b7280; } /* bg-gray-500 */
+
+.buttonReset {
+  background-color: #c2410c; /* bg-orange-700 */
+  color: var(--color-button-text-light);
+}
+.buttonReset:hover:not(:disabled) { background-color: #ea580c; } /* bg-orange-600 */

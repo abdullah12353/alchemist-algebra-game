@@ -1,0 +1,136 @@
+/* src/App.module.css */
+
+.appContainer {
+  /* Use CSS variables defined in index.css */
+  font-family: var(--font-magic);
+  color: var(--color-text-light);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center children horizontally */
+  padding: 1rem; /* 16px */
+  max-width: 1280px; /* Optional: Limit max width */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mainTitle {
+  font-size: 2.25rem; /* 36px */
+  line-height: 2.5rem; /* 40px */
+  font-weight: 700;
+  text-align: center;
+  margin-top: 1rem; /* 16px */
+  margin-bottom: 1rem; /* 16px */
+  color: var(--color-amber-300, #fcd34d); /* Fallback color */
+  /* Basic text shadow for depth */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive title size */
+@media (min-width: 768px) { /* md breakpoint */
+  .mainTitle {
+    font-size: 3rem; /* 48px */
+    line-height: 1;
+    margin-top: 1.5rem; /* 24px */
+    margin-bottom: 1.5rem; /* 24px */
+  }
+}
+
+.equationDisplay {
+  width: 100%;
+  max-width: 56rem; /* max-w-4xl */
+  margin: 1rem 0;
+  padding: 0.75rem; /* 12px */
+  background-color: var(--color-parchment);
+  color: var(--color-text-dark);
+  border-radius: 0.375rem; /* 6px */
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  border: 2px solid var(--color-amber-700, #b45309); /* Fallback color */
+}
+
+.equationText {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700;
+  font-family: monospace; /* Use monospace for better alignment */
+  letter-spacing: 0.05em; /* tracking-wider */
+}
+
+@media (min-width: 768px) { /* md breakpoint */
+   .equationText {
+       font-size: 1.875rem; /* 30px */
+   }
+}
+
+
+.cauldronsContainer {
+  display: flex;
+  flex-direction: column; /* Stack vertically by default */
+  align-items: stretch; /* Make children fill width */
+  width: 100%;
+  max-width: 56rem; /* max-w-4xl */
+  gap: 1rem; /* 16px gap */
+  margin: 1rem 0;
+}
+
+/* Side-by-side layout for medium screens and up */
+@media (min-width: 768px) { /* md breakpoint */
+  .cauldronsContainer {
+    flex-direction: row; /* Row layout */
+    justify-content: center; /* Center items if they don't fill space */
+    gap: 1.5rem; /* 24px gap */
+  }
+}
+
+.controlsContainer {
+   /* This div holds the button or completion message */
+   margin-top: 1rem; /* 16px */
+   height: 3rem; /* 48px - Reserve space to prevent layout shift */
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+.nextLevelButton {
+  padding: 0.75rem 1.5rem; /* 12px 24px */
+  background-color: var(--color-stone-gold);
+  color: var(--color-text-dark);
+  font-weight: 700;
+  border-radius: 0.5rem; /* 8px */
+  box-shadow: var(--shadow-lg);
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+  border: none; /* Ensure no default border */
+}
+
+.nextLevelButton:hover {
+  background-color: var(--color-amber-500, #f59e0b); /* Fallback */
+  transform: translateY(-1px);
+}
+ .nextLevelButton:active {
+    transform: translateY(1px);
+ }
+
+
+.completionMessage {
+  font-size: 1.25rem; /* 20px */
+  color: var(--color-stone-gold);
+  font-weight: 700;
+}
+
+.footer {
+  margin-top: auto; /* Push footer to the bottom */
+  padding-top: 2rem; /* 32px */
+  text-align: center;
+  color: var(--color-amber-100, #fef3c7); /* Fallback */
+  opacity: 0.7;
+  font-size: 0.875rem; /* 14px */
+}
+
+.loadingMessage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-size: 1.5rem; /* 24px */
+    color: var(--color-text-light);
+}

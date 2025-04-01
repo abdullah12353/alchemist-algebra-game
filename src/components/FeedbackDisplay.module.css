@@ -1,0 +1,24 @@
+/* src/components/FeedbackDisplay.module.css */
+.feedbackContainer {
+  min-height: 2.5rem; /* 40px - Ensures space is reserved */
+  margin: 0.5rem 0;
+  text-align: center;
+  display: flex; /* Use flex to center content vertically */
+  justify-content: center;
+  align-items: center;
+}
+
+.feedbackMessage {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  color: var(--color-text-light); /* Default color */
+  transition: color 0.3s ease; /* Smooth color transition */
+}
+
+.feedbackMessageSolved {
+  color: var(--color-stone-gold); /* Special color when solved */
+}
+
+.feedbackMessageError {
+   color: var(--color-error-border); /* Red for errors */
+}

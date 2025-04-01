@@ -1,0 +1,86 @@
+/* src/index.css */
+
+/* Define CSS Variables for consistent theming */
+:root {
+  --font-magic: 'MedievalSharp', Georgia, serif; /* Ensure MedievalSharp is linked in index.html */
+  --color-parchment: #fef3c7;
+  --color-wood-bg: #6b462a;
+  --color-text-dark: #1f2937; /* For text on light backgrounds */
+  --color-text-light: var(--color-parchment); /* For text on dark backgrounds */
+
+  --color-cauldron-bg: #27272a;
+  --color-cauldron-border: #52525b;
+  --color-cauldron-content-bg: rgba(55, 65, 81, 0.7); /* Semi-transparent gray */
+
+  --color-stone-gold: #F59E0B;
+  --color-glow-shroom: #10B981;
+  --color-moon-dew: #60a5fa; /* Blue for 'y' if used */
+
+  --color-button-primary: #a3e635; /* Lime green */
+  --color-button-primary-hover: #84cc16;
+  --color-button-secondary: #f59e0b; /* Amber */
+  --color-button-secondary-hover: #d97706;
+  --color-button-danger: #ef4444; /* Red */
+  --color-button-danger-hover: #dc2626;
+  --color-button-neutral: #6b7280; /* Gray */
+  --color-button-neutral-hover: #4b5563;
+  --color-button-text-dark: #111827;
+  --color-button-text-light: #ffffff;
+
+  --color-success-glow: rgba(163, 230, 53, 0.7);
+  --color-error-border: #ef4444;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+}
+
+/* Basic Reset & Body Styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-magic);
+  background-color: var(--color-wood-bg);
+  color: var(--color-text-light);
+  min-height: 100vh;
+  line-height: 1.6;
+  /* Optional: Add background texture */
+  /* background-image: url('/img/wood-texture.png'); */
+  /* background-repeat: repeat; */
+}
+
+button {
+  font-family: inherit; /* Ensure buttons inherit font */
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+}
+
+input {
+   font-family: inherit;
+}
+
+/* Keyframe Animations (can be used by modules) */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes subtleBubble {
+  0% { transform: translateY(0) scale(1); opacity: 0.6; }
+  50% { transform: translateY(-8px) scale(1.1); opacity: 0.8; }
+  100% { transform: translateY(-15px) scale(1.2); opacity: 0; }
+}
+
+@keyframes glow {
+   0%, 100% { box-shadow: 0 0 10px 3px var(--color-success-glow); }
+   50% { box-shadow: 0 0 20px 8px var(--color-success-glow); }
+}
