@@ -1,65 +1,52 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ingredients } from '../levels/levelData';
-import styles from './Ingredient.module.css'; // Import CSS Module
+import styles from './Ingredient.module.css';
 
-const Ingredient = ({ termKey, coefficient }) => {
-  // Get visual data (symbol, name, base color key)
+// --- Accept scale prop ---
+const Ingredient = ({ termKey, coefficient, scale = 1.0 }) => {
   const visual = ingredients[termKey] || ingredients['_constant'];
-  const isNegative = coefficient < 0;
 
-  if (Math.abs(coefficient) < 1e-9) {
-    return null;
-  }
+  if (Math.abs(coefficient) < 1e-9) return null;
 
-  // Animation variants (remain the same)
   const variants = {
-    initial: { scale: 0.3, opacity: 0, y: 10 },
-    animate: {
-        scale: 1,
-        opacity: 1,
-        y: 0,
-        transition: { type: 'spring', stiffness: 400, damping: 15 }
+    initial: { opacity: 0, y: 10, scale: 0.8 },
+    animate: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
     },
-    exit: {
-        scale: 0.5,
-        opacity: 0,
-        x: Math.random() < 0.5 ? -20 : 20,
-        transition: { duration: 0.2 }
-    },
+    exit: { 
+      opacity: 0, 
+      scale: 0.8, 
+      transition: { duration: 0.2 } 
+    }
   };
 
-  // Format coefficient display logic (remain the same)
-  const formatCoeff = (num) => {
-      const absNum = Math.abs(num);
-      if (termKey !== '_constant' && absNum === 1) return '';
-      return parseFloat(absNum.toFixed(2)).toString();
-  }
-  const coeffStr = formatCoeff(coefficient);
-
-  // Determine background class based on visual data
   let backgroundClass = '';
   switch (termKey) {
-      case 'x': backgroundClass = styles.bgStoneGold; break;
-      case '_constant': backgroundClass = styles.bgGlowShroom; break;
-      case 'y': backgroundClass = styles.bgMoonDew; break;
-      default: backgroundClass = styles.bgGlowShroom; // Fallback
+    case 'x':
+    case 'y':
+    case 'z':
+      backgroundClass = styles.bgStoneGold;
+      break;
+    case '_constant':
+      backgroundClass = styles.bgGlowShroom;
+      break;
+    default:
+      backgroundClass = styles.bgMoonDew;
   }
 
   return (
     <motion.div
-      variants={variants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      layout
-      // Combine base wrapper class with dynamic background class
+      variants={variants} initial="initial" animate="animate" exit="exit"
+      layout whileHover={{ scale: 1.1 * scale, y: -2 }} // Adjust hover based on base scale
+      whileTap={{ scale: 0.95 * scale }}
       className={`${styles.ingredientWrapper} ${backgroundClass}`}
-      title={`${coefficient.toFixed(2)} ${visual.name}`}
+      title={`${visual.name}`}
     >
       <div className={styles.ingredientContent}>
-         {isNegative && <span className={styles.sign}>-</span>}
-         {coeffStr && <span className={styles.coefficient}>{coeffStr}</span>}
          <span className={styles.symbol}>{visual.symbol}</span>
       </div>
     </motion.div>

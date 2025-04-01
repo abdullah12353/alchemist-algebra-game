@@ -1,24 +1,41 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Ingredient from './Ingredient';
-import styles from './Cauldron.module.css'; // Import CSS Module
+import styles from './Cauldron.module.css';
+
+// --- NEW: Configurable limits ---
+const MAX_ICONS_NO_SCALE = 12; // Max icons before scaling starts
+const MAX_ICONS_BEFORE_CLIPPING = 25; // Absolute max (approx) before it gets too small/clips
 
 const Cauldron = ({ sideData, sideName, status }) => {
-  // Filter and sort terms (logic remains the same)
-  const terms = Object.entries(sideData)
+  // Calculate total icons and terms *before* rendering
+  let totalIcons = 0;
+  const termsToRender = Object.entries(sideData)
     .filter(([key, coeff]) => Math.abs(coeff) > 1e-9)
-    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
+    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB)); // Sort for consistent order
 
-  // Determine dynamic classes based on status
-  let statusClass = '';
-  if (status === 'success') {
-    statusClass = styles.statusSuccess;
-  } else if (status === 'error') {
-    statusClass = styles.statusError;
+  termsToRender.forEach(([key, coeff]) => {
+    totalIcons += Math.min(Math.abs(coeff), MAX_ICONS_BEFORE_CLIPPING); // Count icons up to the limit
+  });
+
+  // Determine scale factor based on total icons
+  let scale = 1.0;
+  let containerClass = styles.ingredientsContainer; // Base class
+  if (totalIcons > MAX_ICONS_NO_SCALE && totalIcons <= 18) {
+      scale = 0.85;
+      containerClass += ` ${styles.scale85}`; // Add scaling class
+  } else if (totalIcons > 18) { // Add another tier if needed
+      scale = 0.7;
+      containerClass += ` ${styles.scale70}`;
   }
+   // Add more tiers (e.g., scale 0.6) if necessary
+
+  // Status class logic remains the same
+  let statusClass = '';
+  if (status === 'success') statusClass = styles.statusSuccess;
+  else if (status === 'error') statusClass = styles.statusError;
 
   return (
-    // Apply base wrapper class and conditional status class
     <div className={`${styles.cauldronWrapper} ${statusClass}`}>
       {/* Subtle Bubbles Effect */}
       <div className={styles.bubbleContainer}>
@@ -30,22 +47,41 @@ const Cauldron = ({ sideData, sideName, status }) => {
       {/* Content Area */}
       <div className={styles.contentArea}>
           <h3 className={styles.sideTitle}>{sideName} Side</h3>
-          <div className={styles.ingredientsContainer}>
+          {/* Apply dynamic scaling class */}
+          <div className={containerClass}>
             <AnimatePresence>
-              {terms.length === 0 && (
+              {termsToRender.length === 0 && (
                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 0.5 }}
                     exit={{ opacity: 0 }}
-                    className={styles.emptyMessage} // Style for empty message
+                    className={styles.emptyMessage}
                  >
                     Empty
                  </motion.div>
               )}
-              {terms.map(([key, coeff]) => (
-                // Key needs to be unique and stable
-                <Ingredient key={`${sideName}-${key}-${coeff}`} termKey={key} coefficient={coeff} />
-              ))}
+              {/* --- MODIFIED: Render individual icons --- */}
+              {termsToRender.map(([key, coeff]) => {
+                  const count = Math.min(Math.abs(coeff), MAX_ICONS_BEFORE_CLIPPING); // Limit rendered icons
+                  const items = [];
+                  for (let i = 0; i < count; i++) {
+                      // Pass scale factor to Ingredient, key needs to be unique
+                      items.push(
+                          <Ingredient
+                              key={`${sideName}-${key}-${i}`}
+                              termKey={key}
+                              coefficient={1} // Visually represent as 1
+                              scale={scale} // Pass scale prop
+                          />
+                      );
+                  }
+                  // Wrap term's icons if needed for styling (optional)
+                  return (
+                      <React.Fragment key={`${sideName}-${key}-term`}>
+                          {items}
+                      </React.Fragment>
+                  );
+              })}
             </AnimatePresence>
           </div>
       </div>

@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion'; // Import motion
 import { useGameStore } from '../store/useGameStore';
 import { parseTerm } from '../utils/equationParser';
 import styles from './Toolbar.module.css'; // Import CSS Module
 
-// Reusable Button Component (Internal to Toolbar)
+// --- Wrap Button in motion.button ---
 const OperationButton = ({ onClick, label, children, className = '', disabled = false, icon = null }) => (
-  <button
+  <motion.button
     onClick={onClick}
     disabled={disabled}
-    // Combine base button style with specific color class
     className={`${styles.button} ${className}`}
     aria-label={label}
+    // --- Add Hover/Tap Animations ---
+    whileHover={{ scale: 1.05, y: -1, transition: { duration: 0.1 } }}
+    whileTap={{ scale: 0.95, transition: { duration: 0.05 } }}
   >
     {icon && <span className={styles.buttonIcon}>{icon}</span>}
     <span>{children}</span>
-  </button>
+  </motion.button>
 );
 
 const Toolbar = () => {
@@ -26,26 +29,13 @@ const Toolbar = () => {
      let operationValue;
      if (operation === 'add' || operation === 'subtract' || operation === 'multiply' || operation === 'divide') {
        operationValue = parseFloat(value);
-       if (isNaN(operationValue)) {
-         alert("Please enter a valid number.");
-         return;
-       }
-        if ((operation === 'multiply' || operation === 'divide') && operationValue === 0) {
-            alert(`Cannot ${operation} by zero.`);
-            return;
-        }
+       if (isNaN(operationValue)) { alert("Please enter a valid number."); return; }
+       if ((operation === 'multiply' || operation === 'divide') && operationValue === 0) { alert(`Cannot ${operation} by zero.`); return; }
      } else if (operation === 'addVar' || operation === 'subtractVar') {
          const parsed = parseTerm(varTerm.trim().replace(/\s/g, ''));
-         // Ensure it's a variable term (not just a constant) and has a valid coefficient
-         if (!parsed.variable || parsed.variable === '_constant' || isNaN(parsed.coefficient) || parsed.coefficient === 0) {
-              alert("Please enter a valid variable term with a non-zero coefficient (e.g., '2x', '-y', 'x').");
-              return;
-         }
-         operationValue = parsed; // Pass the parsed { coefficient, variable } object
-     } else {
-         alert(`Unknown operation type: ${operation}`);
-         return;
-     }
+         if (!parsed.variable || parsed.variable === '_constant' || isNaN(parsed.coefficient) || parsed.coefficient === 0) { alert("Please enter a valid variable term with a non-zero coefficient (e.g., '2x', '-y', 'x')."); return; }
+         operationValue = parsed;
+     } else { alert(`Unknown operation type: ${operation}`); return; }
      applyOperationToBothSides(operation, operationValue);
   };
 
@@ -57,12 +47,9 @@ const Toolbar = () => {
       {/* Constant Operations */}
       <div className={styles.operationGroup}>
         <input
-          type="number"
-          step="any"
-          value={value}
+          type="number" step="any" value={value}
           onChange={(e) => setValue(e.target.value)}
-          className={styles.inputField}
-          aria-label="Value for constant operation"
+          className={styles.inputField} aria-label="Value for constant operation"
           disabled={isDisabled}
         />
         <div className={styles.buttonGroup}>
@@ -76,13 +63,10 @@ const Toolbar = () => {
        {/* Variable Operations */}
        <div className={styles.operationGroup}>
          <input
-           type="text"
-           value={varTerm}
+           type="text" value={varTerm}
            onChange={(e) => setVarTerm(e.target.value)}
-           placeholder="e.g., 2x"
-           className={styles.inputField}
-           aria-label="Variable term for operation"
-           disabled={isDisabled}
+           placeholder="e.g., 2x" className={styles.inputField}
+           aria-label="Variable term for operation" disabled={isDisabled}
          />
          <div className={styles.buttonGroup}>
             <OperationButton onClick={() => handleApply('addVar')} label={`Add ${varTerm}`} className={styles.buttonAdd} disabled={isDisabled} icon="➕">Add Var</OperationButton>

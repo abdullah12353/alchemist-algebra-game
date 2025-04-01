@@ -1,53 +1,79 @@
 /* src/components/Ingredient.module.css */
 .ingredientWrapper {
-  margin: 0.25rem; /* 4px */
-  padding: 0.5rem; /* 8px */
-  border-radius: 9999px; /* Full round */
+  margin: 0.25rem;
+  padding: 0.5rem;
+  border-radius: 9999px;
   box-shadow: var(--shadow-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: var(--color-text-dark); /* Dark text on colored background */
+  color: var(--color-text-dark);
   font-weight: 700;
-  position: relative; /* Needed for potential absolute elements inside */
-  min-height: 3rem; /* 48px */
-  min-width: 3rem; /* 48px */
+  position: relative;
+  /* Base size - adjust as needed */
+  height: 3rem;
+  min-width: 3rem;
   border: 2px solid rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease-out; /* Add transition for hover/active */
+  /* Transition transform for scaling */
+  transition: transform 0.2s ease-out, background-color 0.2s;
 }
 
-/* Add hover effect */
+/* Remove transform from hover if scale is applied dynamically */
 .ingredientWrapper:hover {
-    transform: scale(1.05);
+    /* transform: scale(1.05); */ /* Remove if scale prop/class is used */
+    filter: brightness(1.1); /* Use filter for hover instead */
 }
 
 .ingredientContent {
   display: flex;
   align-items: center;
-  padding: 0 0.25rem; /* 4px */
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .sign {
-  font-size: 1.125rem; /* 18px */
-  margin-right: 0.1rem;
-  font-family: sans-serif; /* Use sans-serif for symbols/numbers */
+  position: absolute;
+  top: -0.75rem;
+  left: -0.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
 }
 
 .coefficient {
-  font-size: 0.875rem; /* 14px */
-  margin-right: 0.1rem;
-  font-family: sans-serif;
-  font-weight: 600;
+  position: absolute;
+  top: -0.75rem;
+  right: -0.5rem;
+  font-size: 0.875rem;
+  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 9999px;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.1rem;
 }
 
 .symbol {
-  font-size: 1.25rem; /* 20px */
-  line-height: 1; /* Prevent extra space */
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: font-size 0.2s ease-out; /* Allow symbol to scale smoothly if needed */
 }
 
-/* Background colors based on ingredient type */
-.bgStoneGold { background-color: var(--color-stone-gold); }
-.bgGlowShroom { background-color: var(--color-glow-shroom); }
-.bgMoonDew { background-color: var(--color-moon-dew); }
-/* Add more as needed */
+/* Background colors based on term type */
+.bgStoneGold {
+  background-color: var(--color-stone-gold);
+}
+
+.bgGlowShroom {
+  background-color: var(--color-glow-shroom);
+}
+
+.bgMoonDew {
+  background-color: var(--color-moon-dew);
+}

@@ -1,0 +1,76 @@
+/* src/utils/visualFormatter.module.css */
+.visualEquationSide {
+    display: flex;
+    flex-wrap: wrap; /* Allow terms to wrap if needed */
+    align-items: center; /* Align items vertically */
+    justify-content: center; /* Center items horizontally */
+    gap: 0.5rem; /* Space between operators and terms */
+    min-height: 3rem; /* Match ingredient height */
+}
+
+.termVisual {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.15rem; /* Reduced gap slightly */
+    position: relative;
+}
+
+/* --- NEW --- Style for the coefficient number when icons are scaled */
+.termCoefficientNumber {
+    font-family: sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-text-dark);
+    margin-right: 0.1rem; /* Tiny space before icon */
+    line-height: 1;
+}
+
+/* --- NEW --- Style for visual negative sign *next to* the term */
+.negativeSignVisual {
+    font-size: 1.5rem; /* Match operator size */
+    font-weight: bold;
+    font-family: sans-serif;
+    color: var(--color-error-border);
+    margin-right: 0.1rem; /* Tiny space before number/icon */
+    line-height: 1;
+}
+
+.operatorVisual {
+    font-size: 1.5rem;
+    font-weight: bold;
+    font-family: sans-serif;
+    color: var(--color-parchment);
+    padding: 0 0.25rem;
+    line-height: 1;
+}
+
+.plus {
+    color: #a3e635;
+}
+
+.minus {
+    /* Minus operator is now handled by negativeSignVisual within the term */
+    /* Keep style if needed elsewhere, but likely unused for term separation */
+     color: #f87171;
+}
+
+.emptyVisual {
+    font-style: normal; /* Not italic */
+    opacity: 1.0;
+    font-weight: bold;
+    font-family: monospace; /* Match equation text */
+    font-size: 1.5rem; /* Match equation text size */
+    color: var(--color-text-dark);
+}
+
+/* Ensure ingredient icons in this context don't have extra margin */
+.termVisual > div[class*="Ingredient_ingredientWrapper"] {
+    margin: 0 !important; /* Override ingredient margin */
+    height: 2rem; /* Slightly smaller in equation line */
+    min-width: 2rem;
+    padding: 0.3rem;
+}
+.termVisual span[class*="Ingredient_symbol"] {
+    font-size: 1rem; /* Smaller symbol in equation line */
+}
