@@ -1,19 +1,20 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { levels } from '../levels/levelData';
+// --- Import findSolution ---
+import { levels, findSolution } from '../levels/levelData';
 import { parseEquation, formatEquationSide } from '../utils/equationParser';
 import { playSound } from '../utils/soundUtils';
 
 // Helper to perform deep copy for state history
 const deepCopy = (obj) => JSON.parse(JSON.stringify(obj));
-const FLOAT_TOLERANCE = 1e-9; // Tolerance for comparing float results
+const FLOAT_TOLERANCE = 1e-6; // Slightly larger tolerance for user input
 
 // Helper to compare cauldron states (ignoring zero coefficients)
 const areSidesEqual = (sideA, sideB) => {
     const cleanA = {};
     const cleanB = {};
-    Object.keys(sideA).forEach(k => { if (Math.abs(sideA[k]) > 1e-9) cleanA[k] = sideA[k]; });
-    Object.keys(sideB).forEach(k => { if (Math.abs(sideB[k]) > 1e-9) cleanB[k] = sideB[k]; });
+    Object.keys(sideA).forEach(k => { if (Math.abs(sideA[k]) > FLOAT_TOLERANCE) cleanA[k] = sideA[k]; });
+    Object.keys(sideB).forEach(k => { if (Math.abs(sideB[k]) > FLOAT_TOLERANCE) cleanB[k] = sideB[k]; });
 
     const keysA = Object.keys(cleanA).sort();
     const keysB = Object.keys(cleanB).sort();
@@ -23,7 +24,7 @@ const areSidesEqual = (sideA, sideB) => {
 
     for (let i = 0; i < keysA.length; i++) {
         const key = keysA[i];
-        if (key !== keysB[i] || Math.abs((cleanA[key] || 0) - (cleanB[key] || 0)) > 1e-9) {
+        if (key !== keysB[i] || Math.abs((cleanA[key] || 0) - (cleanB[key] || 0)) > FLOAT_TOLERANCE) {
             return false;
         }
     }
@@ -39,34 +40,26 @@ const initialState = {
   targetVariable: 'x',
   history: [],
   feedbackMessage: '',
-  isSolved: false,
+  isSolved: false, // Still useful to know if *current* state is x=N or N=x
   isAnimating: false,
-  // New state for visual feedback
-  leftCauldronStatus: 'idle', // 'idle', 'success', 'error'
+  leftCauldronStatus: 'idle',
   rightCauldronStatus: 'idle',
-  // Add new state for temporary symbol reveal
   showSymbolsTemporarily: false,
-  // --- NEW ANSWER STATE ---
-  userAnswer: '', // Stores the user's input for the variable value
-  isAnswerCorrect: false, // Tracks if the submitted answer was correct
-  solutionValue: null, // Stores the actual numerical solution when isSolved=true
+  userAnswer: '',
+  isAnswerCorrect: false, // Now means: userAnswer matches trueSolutionValue
+  // --- Store the TRUE solution for the initial equation ---
+  trueSolutionValue: null, // Stores the actual numerical solution for the *level*
 };
 
 export const useGameStore = create(
-  // Add persist middleware
   persist(
     (set, get) => ({
-      ...initialState, // Spread initial state
+      ...initialState,
 
-      // Add new action to toggle symbol visibility
-      setShowSymbolsTemporarily: (show) => {
-        set({ showSymbolsTemporarily: show });
-      },
-
-      // --- NEW ACTION ---
+      setShowSymbolsTemporarily: (show) => set({ showSymbolsTemporarily: show }),
       setUserAnswer: (answer) => set({ userAnswer: answer }),
 
-      // --- Initialization ---
+      // --- MODIFIED loadLevel ---
       loadLevel: (levelIndex) => {
         if (levelIndex >= get().levels.length || levelIndex < 0) {
           console.warn("Attempted to load invalid level index:", levelIndex);
@@ -76,78 +69,159 @@ export const useGameStore = create(
           }
           return;
         }
+        
         const level = get().levels[levelIndex];
         const { left, right } = parseEquation(level.initialEquation);
         const initialHistory = [{ leftCauldron: deepCopy(left), rightCauldron: deepCopy(right) }];
+        
+        // --- Calculate true solution on load ---
+        const trueSolution = findSolution(level.initialEquation, level.targetVariable);
+
         set({
           ...initialState, // Reset most state to initial values
-          currentLevelIndex: levelIndex, // Keep the new index
-          levels: get().levels, // Keep levels data
+          currentLevelIndex: levelIndex,
+          levels: get().levels,
           leftCauldron: left,
           rightCauldron: right,
           targetVariable: level.targetVariable,
           history: initialHistory,
-          feedbackMessage: level.description || `Level ${level.id}: Isolate the ${get().targetVariable}`, // Default message
-          // Ensure all relevant flags are reset
+          feedbackMessage: level.description || `Level ${level.id}: Balance the cauldrons!`,
+          trueSolutionValue: trueSolution, // Store the calculated true solution
+          // Ensure flags are reset
           isSolved: false,
           isAnswerCorrect: false,
           userAnswer: '',
-          solutionValue: null,
           showSymbolsTemporarily: false,
         });
-        playSound('levelStart'); // Play sound on level load
+        playSound('levelStart');
       },
 
-      // --- Core Game Actions ---
+      // --- MODIFIED _updateState ---
       _updateState: (newLeft, newRight, message = '', status = 'success') => {
         const currentState = get();
         const newHistory = [...currentState.history, { leftCauldron: deepCopy(newLeft), rightCauldron: deepCopy(newRight) }];
-
         set({
-            leftCauldron: newLeft,
-            rightCauldron: newRight,
+            leftCauldron: newLeft, 
+            rightCauldron: newRight, 
             history: newHistory,
-            feedbackMessage: message,
-            isAnimating: true, // Start animation/block input
-            leftCauldronStatus: status, // Set status for visual feedback
+            feedbackMessage: message, 
+            isAnimating: true,
+            leftCauldronStatus: status, 
             rightCauldronStatus: status,
-            isAnswerCorrect: false, 
-            userAnswer: '', 
-            solutionValue: null, // Reset answer state on any operation
+            // Don't reset answer state here, allow user to check answer anytime
+            // isAnswerCorrect: false, userAnswer: '',
         });
+        
+        if (status === 'success') playSound('operationSuccess');
+        else if (status === 'error') playSound('operationFail');
 
-        // Play sound based on status
-        if (status === 'success') {
-            playSound('operationSuccess');
-        } else if (status === 'error') {
-            playSound('operationFail');
-        }
-
-        // Check for solution after state update and animation delay
         setTimeout(() => {
-            const solved = get().checkSolved(); // checkSolved now also sets solutionValue
+            // Check if current state *looks* solved (x=N or N=x)
+            const solved = get().checkSolvedState();
             set({
-                isSolved: solved,
-                isAnimating: false, // End animation/allow input
-                // Reset status after a short delay, unless solved
+                isSolved: solved, // Set if equation *looks* balanced
+                isAnimating: false,
                 leftCauldronStatus: solved ? 'success' : 'idle',
                 rightCauldronStatus: solved ? 'success' : 'idle',
             });
-             if (solved) {
-                 set({ feedbackMessage: "Equation balanced! Now enter the value." });
-                 playSound('levelSolved'); // Sound indicates balancing success
-             }
-        }, 600); // Slightly longer delay to see status effect
+             // Don't change feedback here based on isSolved anymore
+             // Feedback comes from checkUserAnswer or operations
+        }, 600);
+      },
+
+      // --- RENAMED checkSolved to checkSolvedState ---
+      // Checks if the *current* cauldron state is in the form x=N or N=x
+      // Does NOT compare to the true solution.
+      checkSolvedState: () => {
+        const { leftCauldron, rightCauldron, targetVariable } = get();
+        const cleanLeft = {}; 
+        const cleanRight = {};
+        
+        Object.keys(leftCauldron).forEach(k => { 
+          if (Math.abs(leftCauldron[k]) > FLOAT_TOLERANCE) cleanLeft[k] = leftCauldron[k]; 
+        });
+        
+        Object.keys(rightCauldron).forEach(k => { 
+          if (Math.abs(rightCauldron[k]) > FLOAT_TOLERANCE) cleanRight[k] = rightCauldron[k]; 
+        });
+        
+        const leftKeys = Object.keys(cleanLeft); 
+        const rightKeys = Object.keys(cleanRight);
+        
+        // Condition 1: x = number
+        const isLeftSolved = leftKeys.length === 1 && 
+                             leftKeys[0] === targetVariable && 
+                             Math.abs(cleanLeft[targetVariable] - 1) < FLOAT_TOLERANCE && 
+                             rightKeys.length === 1 && 
+                             rightKeys[0] === '_constant';
+        
+        // Condition 2: number = x
+        const isRightSolved = rightKeys.length === 1 && 
+                              rightKeys[0] === targetVariable && 
+                              Math.abs(cleanRight[targetVariable] - 1) < FLOAT_TOLERANCE && 
+                              leftKeys.length === 1 && 
+                              leftKeys[0] === '_constant';
+        
+        return isLeftSolved || isRightSolved;
+      },
+
+      // --- MODIFIED checkUserAnswer ---
+      checkUserAnswer: () => {
+          const { userAnswer, trueSolutionValue, targetVariable } = get();
+
+          // Handle special cases from findSolution
+          if (trueSolutionValue === null) {
+              set({ feedbackMessage: "Hmm, this equation seems unsolvable!", isAnswerCorrect: false });
+              playSound('operationFail');
+              return;
+          }
+          if (trueSolutionValue === Infinity) {
+               set({ feedbackMessage: "Any number works here! (Infinite Solutions)", isAnswerCorrect: true }); // Mark as correct for progression
+               playSound('operationSuccess');
+               return;
+          }
+
+          const userAnswerNum = parseFloat(userAnswer);
+          if (isNaN(userAnswerNum)) {
+              set({ feedbackMessage: "Please enter a valid number.", isAnswerCorrect: false });
+              playSound('operationFail');
+              return;
+          }
+
+          // Compare user input to the stored *true* solution for the level
+          if (Math.abs(userAnswerNum - trueSolutionValue) < FLOAT_TOLERANCE) {
+              set({
+                  feedbackMessage: `Correct! The solution is ${targetVariable} = ${trueSolutionValue}. Well done!`,
+                  isAnswerCorrect: true, // Set flag for progression
+                  // Optionally, force the cauldrons to the solved state if desired
+                  // leftCauldron: { [targetVariable]: 1 },
+                  // rightCauldron: { _constant: trueSolutionValue },
+                  // isSolved: true, // Mark as visually solved too
+              });
+              playSound('operationSuccess');
+          } else {
+              set({
+                  feedbackMessage: `Not quite. Check your steps or calculation! You entered ${userAnswerNum}.`,
+                  isAnswerCorrect: false
+              });
+              playSound('operationFail');
+          }
       },
 
       applyOperationToBothSides: (operation, value) => {
-        if (get().isAnimating || get().isSolved) return;
+        // --- Prevent operations if answer is already correct ---
+        if (get().isAnswerCorrect) {
+            set({ feedbackMessage: "You already found the correct answer!" });
+            return;
+        }
+        
+        if (get().isAnimating) return;
 
         const { leftCauldron, rightCauldron } = get();
         let newLeft = deepCopy(leftCauldron);
         let newRight = deepCopy(rightCauldron);
         let message = '';
-        let status = 'success'; // Assume success initially
+        let status = 'success';
 
         try {
             switch (operation) {
@@ -181,9 +255,6 @@ export const useGameStore = create(
                     break;
                 case 'divide':
                     if (value === 0) throw new Error("Cannot divide by zero.");
-                    // Basic check for division leading to issues (optional)
-                    // This is tricky - what constitutes an "invalid" division depends on game rules
-                    // For now, allow floats. Could add checks later if needed.
                     Object.keys(newLeft).forEach(key => newLeft[key] /= value);
                     Object.keys(newRight).forEach(key => newRight[key] /= value);
                      message = `Divided both sides by ${value}.`;
@@ -193,115 +264,38 @@ export const useGameStore = create(
             }
 
             // Clean up zero coefficients
-            Object.keys(newLeft).forEach(key => { if (Math.abs(newLeft[key]) < 1e-9) delete newLeft[key]; });
-            Object.keys(newRight).forEach(key => { if (Math.abs(newRight[key]) < 1e-9) delete newRight[key]; });
+            Object.keys(newLeft).forEach(key => { if (Math.abs(newLeft[key]) < FLOAT_TOLERANCE) delete newLeft[key]; });
+            Object.keys(newRight).forEach(key => { if (Math.abs(newRight[key]) < FLOAT_TOLERANCE) delete newRight[key]; });
              if (Object.keys(newLeft).length === 0) newLeft['_constant'] = 0;
              if (Object.keys(newRight).length === 0) newRight['_constant'] = 0;
 
             get()._updateState(newLeft, newRight, message, status);
-
         } catch (error) {
             console.error("Operation Error:", error);
-            // Use _updateState to show error feedback visually
             get()._updateState(
-                deepCopy(leftCauldron), // Revert to original state on error
+                deepCopy(leftCauldron),
                 deepCopy(rightCauldron),
                 `Error: ${error.message}`,
-                'error' // Set status to error
+                'error'
             );
         }
       },
 
-      // --- MODIFIED checkSolved ---
-      // Now also calculates and stores the solution value if solved
-      checkSolved: () => {
-        const { leftCauldron, rightCauldron, targetVariable } = get();
-        const cleanLeft = {};
-        const cleanRight = {};
-        Object.keys(leftCauldron).forEach(k => { if (Math.abs(leftCauldron[k]) > FLOAT_TOLERANCE) cleanLeft[k] = leftCauldron[k]; });
-        Object.keys(rightCauldron).forEach(k => { if (Math.abs(rightCauldron[k]) > FLOAT_TOLERANCE) cleanRight[k] = rightCauldron[k]; });
-        const leftKeys = Object.keys(cleanLeft);
-        const rightKeys = Object.keys(cleanRight);
-
-        let solved = false;
-        let calculatedSolution = null;
-
-        // Condition 1: x = number
-        const isLeftSolved = leftKeys.length === 1 && 
-                             leftKeys[0] === targetVariable && 
-                             Math.abs(cleanLeft[targetVariable] - 1) < FLOAT_TOLERANCE && 
-                             rightKeys.length === 1 && 
-                             rightKeys[0] === '_constant';
-        
-        if (isLeftSolved) {
-            solved = true;
-            calculatedSolution = cleanRight['_constant'];
-        }
-
-         // Condition 2: number = x
-         const isRightSolved = !solved && 
-                              rightKeys.length === 1 && 
-                              rightKeys[0] === targetVariable && 
-                              Math.abs(cleanRight[targetVariable] - 1) < FLOAT_TOLERANCE && 
-                              leftKeys.length === 1 && 
-                              leftKeys[0] === '_constant';
-         
-         if (isRightSolved) {
-             solved = true;
-             calculatedSolution = cleanLeft['_constant'];
-         }
-
-         // Store the calculated solution if solved
-         set({ solutionValue: solved ? calculatedSolution : null });
-         return solved;
-      },
-
-      // --- NEW ACTION ---
-      checkUserAnswer: () => {
-          const { userAnswer, solutionValue, isSolved } = get();
-          if (!isSolved || solutionValue === null) {
-              set({ feedbackMessage: "Balance the equation first!" });
-              playSound('operationFail');
-              return;
-          }
-
-          const userAnswerNum = parseFloat(userAnswer);
-          if (isNaN(userAnswerNum)) {
-              set({ feedbackMessage: "Please enter a valid number.", isAnswerCorrect: false });
-              playSound('operationFail');
-              return;
-          }
-
-          // Compare using tolerance
-          if (Math.abs(userAnswerNum - solutionValue) < FLOAT_TOLERANCE) {
-              set({ feedbackMessage: `Correct! ${get().targetVariable} = ${solutionValue}`, isAnswerCorrect: true });
-              playSound('operationSuccess'); // Use a general success sound
-          } else {
-              set({ feedbackMessage: `Not quite. Try again! You entered ${userAnswerNum}.`, isAnswerCorrect: false });
-              playSound('operationFail');
-          }
-      },
-
-      // --- Navigation ---
+      // --- MODIFIED goToNextLevel ---
       goToNextLevel: () => {
-        // Progression now depends on BOTH solving AND correct answer
-        if (get().isSolved && get().isAnswerCorrect) {
+        // Progression now depends ONLY on correct answer flag
+        if (get().isAnswerCorrect) {
           const nextLevelIndex = get().currentLevelIndex + 1;
-          // No need to check length here, loadLevel handles it
           get().loadLevel(nextLevelIndex);
-        } else if (!get().isSolved) {
-            set({ feedbackMessage: "Balance the equation first!" });
-            playSound('operationFail'); // Play fail sound if trying to advance unsolved
         } else {
-            set({ feedbackMessage: "Check your answer first!" });
-            playSound('operationFail');
+             set({ feedbackMessage: "Please enter the correct answer first!" });
+             playSound('operationFail');
         }
       },
 
       resetLevel: () => {
         if (get().isAnimating) return;
         playSound('reset');
-        // loadLevel now handles resetting all necessary state
         get().loadLevel(get().currentLevelIndex);
       },
 
@@ -317,38 +311,33 @@ export const useGameStore = create(
                   rightCauldron: deepCopy(previousState.rightCauldron),
                   history: newHistory,
                   isSolved: false,
-                  isAnswerCorrect: false,
-                  userAnswer: '',
-                  solutionValue: null,
+                  // Don't reset answer state on undo, just visual solved state
+                  // isAnswerCorrect: false,
+                  // userAnswer: '',
                   feedbackMessage: "Undo successful.",
-                  leftCauldronStatus: 'idle', // Reset status on undo
+                  leftCauldronStatus: 'idle',
                   rightCauldronStatus: 'idle',
-                  showSymbolsTemporarily: false, // Reset temporary view on undo
+                  showSymbolsTemporarily: false,
               });
           } else {
               set({ feedbackMessage: "Cannot undo further." });
               playSound('operationFail');
           }
       },
-
     }),
     {
-      name: 'alchemist-workshop-progress', // Name for localStorage key
-      storage: createJSONStorage(() => localStorage), // Use localStorage
-      partialize: (state) => ({ currentLevelIndex: state.currentLevelIndex }), // Only save the level index
-       // On load, merge the saved index with the initial state
-       merge: (persistedState, currentState) => {
-         // Make sure persistedState is valid
+      name: 'alchemist-workshop-progress',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ currentLevelIndex: state.currentLevelIndex }),
+      merge: (persistedState, currentState) => {
          if (persistedState && typeof persistedState.currentLevelIndex === 'number') {
-            // Load the level based on the persisted index, but keep other current state defaults
-            // We call loadLevel later in App.jsx useEffect based on the loaded index
             return {
-                ...currentState, // Keep defaults from initialState
-                currentLevelIndex: persistedState.currentLevelIndex, // Overwrite with saved index
+                ...currentState,
+                currentLevelIndex: persistedState.currentLevelIndex,
             };
          }
-         return currentState; // Fallback to current state if persisted is invalid
-       },
+         return currentState;
+      },
     }
   )
 );

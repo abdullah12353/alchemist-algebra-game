@@ -4,10 +4,12 @@ import Cauldron from './components/Cauldron';
 import Toolbar from './components/Toolbar';
 import FeedbackDisplay from './components/FeedbackDisplay';
 import LevelIndicator from './components/LevelIndicator';
-import { motion, AnimatePresence } from 'framer-motion'; // Import AnimatePresence
+import { motion, AnimatePresence } from 'framer-motion';
 import { preloadSounds } from './utils/soundUtils';
 import { formatEquationSide } from './utils/equationParser';
 import { formatSideVisually } from './utils/visualFormatter';
+// --- Import ingredients data ---
+import { ingredients } from './levels/levelData';
 import styles from './App.module.css';
 
 function App() {
@@ -15,9 +17,8 @@ function App() {
   const {
     loadLevel, leftCauldron, rightCauldron, isSolved, goToNextLevel,
     currentLevelIndex, leftCauldronStatus, rightCauldronStatus, levels,
-    showSymbolsTemporarily, setShowSymbolsTemporarily, targetVariable, // Get targetVariable for instructions
-    // --- NEW: Answer State ---
-    userAnswer, setUserAnswer, isAnswerCorrect, checkUserAnswer, solutionValue
+    showSymbolsTemporarily, setShowSymbolsTemporarily, targetVariable,
+    userAnswer, setUserAnswer, isAnswerCorrect, checkUserAnswer, trueSolutionValue // Use trueSolutionValue
   } = useGameStore();
 
   const [isInitialized, setIsInitialized] = useState(false);
@@ -52,28 +53,34 @@ function App() {
   }
 
   const isLastLevel = currentLevelIndex >= levels.length - 1;
-  const showAnswerInput = isSolved && !isAnswerCorrect; // Show input when solved but not yet correct
 
-  // --- Determine Instructions Text ---
-  let instructionsText = `Goal: Isolate the ${ingredients[targetVariable]?.symbol || targetVariable}...`;
-  if (isSolved && !isAnswerCorrect) {
-      instructionsText = `Equation balanced! What is the value of ${ingredients[targetVariable]?.symbol || targetVariable}?`;
-  } else if (isAnswerCorrect) {
-      instructionsText = `Correct! ${targetVariable} = ${solutionValue}. Ready for the next level!`;
-  } else if (displayMode === 'hybrid') {
-    instructionsText = "Icons represent ingredients. Hold the (👁️) button below to see the algebraic symbols.";
-  } else if (displayMode === 'symbol') {
-    instructionsText = `Goal: Isolate ${targetVariable} using algebraic operations.`;
+  // --- Determine Placeholder/Label for Answer Box ---
+  let answerPlaceholder = `Enter value for ${targetVariable}...`;
+  let answerLabel = `What is the value of ${targetVariable}?`;
+  if (displayMode === 'icon' || displayMode === 'hybrid') {
+      const targetSymbol = ingredients[targetVariable]?.symbol || targetVariable;
+      const constantSymbol = ingredients['_constant']?.symbol || 'value';
+      // Ask in terms of icons
+      answerPlaceholder = `How many ${constantSymbol} = 1 ${targetSymbol}?`;
+      answerLabel = `How many ${constantSymbol} equal 1 ${targetSymbol}?`;
   }
 
-  // Event Handlers for Reveal Button
+  // Instructions Text Logic
+  let instructionsText = `Goal: Isolate the ${ingredients[targetVariable]?.symbol || targetVariable}...`;
+   if (isAnswerCorrect) {
+       instructionsText = `Correct! ${targetVariable} = ${trueSolutionValue}. Ready for the next level!`;
+   } else if (displayMode === 'hybrid') {
+     instructionsText = "Icons represent ingredients. Hold the (👁️) button below to see the algebraic symbols.";
+   } else if (displayMode === 'symbol') {
+     instructionsText = `Goal: Isolate ${targetVariable} using algebraic operations.`;
+   }
+
+  // Event Handlers
   const handleRevealStart = () => setShowSymbolsTemporarily(true);
   const handleRevealEnd = () => setShowSymbolsTemporarily(false);
-  
-  // --- NEW: Answer Input Handlers ---
   const handleAnswerChange = (e) => setUserAnswer(e.target.value);
   const handleAnswerSubmit = (e) => {
-      e.preventDefault(); // Prevent form submission reload
+      e.preventDefault();
       checkUserAnswer();
   };
 
@@ -82,14 +89,14 @@ function App() {
     <div className={styles.appContainer}>
       <h1 className={styles.mainTitle}>Alchemist's Workshop</h1>
 
-      {/* --- Instructions Area --- */}
+      {/* Instructions Area */}
       <AnimatePresence>
         <motion.div
-          key={`instructions-${currentLevelIndex}-${isSolved}-${isAnswerCorrect}`} // Update key to trigger animation on state change
+          key={`instructions-${currentLevelIndex}-${isAnswerCorrect}`}
           className={styles.instructionsBox}
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }} // Optional exit animation
+          exit={{ opacity: 0, y: -5 }}
           transition={{ duration: 0.4 }}
         >
           {instructionsText}
@@ -99,17 +106,17 @@ function App() {
       <LevelIndicator />
       <FeedbackDisplay />
 
-      {/* Equation Display Area - Adjusted for side alignment */}
+      {/* Equation Display Area */}
       <div className={styles.equationDisplay}>
-        <div className={styles.equationSideContainer} style={{ justifyContent: 'flex-end' }}> {/* Left Side */}
+        <div className={styles.equationSideContainer} style={{ justifyContent: 'flex-end' }}>
           {showSymbols ? (
             <span className={styles.equationText}>{leftDisplayContent}</span>
           ) : (
             <div className={styles.visualEquationSide}>{leftDisplayContent}</div>
           )}
         </div>
-        <span className={styles.equalsSignVisual}>=</span> {/* Equals Sign */}
-        <div className={styles.equationSideContainer} style={{ justifyContent: 'flex-start' }}> {/* Right Side */}
+        <span className={styles.equalsSignVisual}>=</span>
+        <div className={styles.equationSideContainer} style={{ justifyContent: 'flex-start' }}>
            {showSymbols ? (
             <span className={styles.equationText}>{rightDisplayContent}</span>
           ) : (
@@ -118,13 +125,15 @@ function App() {
         </div>
       </div>
 
-      {/* Reveal Symbols Button (Conditional) */}
-      {displayMode === 'hybrid' && !isSolved && ( /* Hide reveal when solved */
+      {/* Reveal Symbols Button (Conditional) - Hide if answer is correct */}
+      {displayMode === 'hybrid' && !isAnswerCorrect && (
         <div className={styles.revealButtonContainer}>
-          <motion.button // Add motion here too
+          <motion.button
             className={styles.revealButton}
-            onMouseDown={handleRevealStart} onMouseUp={handleRevealEnd}
-            onTouchStart={handleRevealStart} onTouchEnd={handleRevealEnd}
+            onMouseDown={handleRevealStart} 
+            onMouseUp={handleRevealEnd}
+            onTouchStart={handleRevealStart} 
+            onTouchEnd={handleRevealEnd}
             onMouseLeave={handleRevealEnd}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -134,36 +143,42 @@ function App() {
         </div>
       )}
       
-      {/* --- NEW Answer Input Area (Conditional) --- */}
-      {showAnswerInput && (
-          <motion.form
-              className={styles.answerForm}
-              onSubmit={handleAnswerSubmit}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+      {/* --- Answer Input Area (Always Visible) --- */}
+      <motion.form
+          className={styles.answerForm}
+          onSubmit={handleAnswerSubmit}
+          // Animate presence based on whether the answer is already correct
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: isAnswerCorrect ? 0.5 : 1, y: isAnswerCorrect ? 10 : 0 }}
+          transition={{ duration: 0.3 }}
+          style={{ visibility: isAnswerCorrect ? 'visible' : 'visible' }} // Always visible
+      >
+          <label htmlFor="answerInput" className={styles.answerLabel}>
+              {answerLabel}
+          </label>
+          <input
+              id="answerInput"
+              type="number"
+              step="any"
+              value={userAnswer}
+              onChange={handleAnswerChange}
+              className={styles.answerInput}
+              placeholder={answerPlaceholder} // Use dynamic placeholder
+              aria-label={answerLabel} // Use dynamic label
+              required
+              // Disable input if answer is already correct
+              disabled={isAnswerCorrect}
+          />
+          <motion.button
+              type="submit"
+              className={styles.answerButton}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              disabled={isAnswerCorrect} // Disable button when correct
           >
-              <input
-                  type="number"
-                  step="any" // Allow decimals
-                  value={userAnswer}
-                  onChange={handleAnswerChange}
-                  className={styles.answerInput}
-                  placeholder={`Enter value for ${targetVariable}...`}
-                  aria-label={`Enter value for ${targetVariable}`}
-                  required
-                  autoFocus
-              />
-              <motion.button
-                  type="submit"
-                  className={styles.answerButton}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-              >
-                  Check Answer
-              </motion.button>
-          </motion.form>
-      )}
+              Check Answer
+          </motion.button>
+      </motion.form>
 
       {/* Cauldrons Row */}
       <div className={styles.cauldronsContainer}>
@@ -171,27 +186,30 @@ function App() {
         <Cauldron key={`right-${currentLevelIndex}`} sideData={rightCauldron} sideName="Right" status={rightCauldronStatus} />
       </div>
 
-      {/* Toolbar Area - Disable toolbar when solved */}
+      {/* Toolbar Area - Disable toolbar if answer is correct */}
       <Toolbar />
 
       {/* Controls Container */}
       <div className={styles.controlsContainer}>
-        {/* Show Next Level ONLY when solved AND answer is correct */}
-        {isSolved && isAnswerCorrect && !isLastLevel && (
+        {/* Show Next Level ONLY when answer is correct */}
+        {isAnswerCorrect && !isLastLevel && (
           <motion.button
-            initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.5, type: 'spring', stiffness: 200 }} // Adjusted spring
+            initial={{ scale: 0.8, opacity: 0 }} 
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
             whileHover={{ scale: 1.05, transition: { duration: 0.1 } }}
             whileTap={{ scale: 0.95, transition: { duration: 0.1 } }}
-            onClick={goToNextLevel} className={styles.nextLevelButton}
+            onClick={goToNextLevel} 
+            className={styles.nextLevelButton}
           >
             Next Level →
           </motion.button>
         )}
-        {/* Show Completion Message */}
-        {isSolved && isAnswerCorrect && isLastLevel && (
+        {isAnswerCorrect && isLastLevel && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            transition={{ delay: 0.5 }}
             className={styles.completionMessage}
           >
             You have mastered all the recipes!
@@ -208,10 +226,3 @@ function App() {
 }
 
 export default App;
-
-// Helper component from levelData (needed for instructions)
-const ingredients = {
-  x: { name: "Philosopher's Stone", symbol: '💎', color: 'bg-stone-gold' },
-  _constant: { name: "Glow Shroom", symbol: '🍄', color: 'bg-potion-green' },
-  y: { name: "Moon Dew", symbol: '💧', color: 'bg-blue-400' },
-};

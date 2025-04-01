@@ -103,15 +103,30 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* --- NEW Styles for Answer Input --- */
+/* --- MODIFIED Styles for Answer Input Area --- */
 .answerForm {
     display: flex;
+    flex-direction: column; /* Stack label, input, button vertically */
     justify-content: center;
     align-items: center;
     gap: 0.5rem;
-    margin: 1rem 0;
+    margin: 0.75rem 0; /* Adjusted margin */
     width: 100%;
-    max-width: 25rem; /* Limit width of answer area */
+    max-width: 28rem; /* Slightly wider */
+    transition: opacity 0.3s, visibility 0.3s; /* For hiding when correct */
+}
+
+.answerLabel {
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: sans-serif;
+    color: var(--color-text-dark);
+    margin-bottom: 0.1rem;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    box-shadow: var(--shadow-sm);
 }
 
 .answerInput {
@@ -123,9 +138,12 @@
     background-color: var(--color-parchment);
     color: var(--color-text-dark);
     text-align: center;
-    flex-grow: 1; /* Allow input to take available space */
-    min-width: 80px; /* Ensure minimum width */
+    width: 100%; /* Take full width of form */
     box-shadow: var(--shadow-inner);
+}
+.answerInput:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 .answerInput:focus {
     outline: none;
@@ -134,7 +152,7 @@
 }
 
 .answerButton {
-    padding: 0.6rem 1rem;
+    padding: 0.6rem 1.5rem; /* Wider button */
     background-color: var(--color-button-primary);
     color: var(--color-button-text-dark);
     font-weight: 600;
@@ -143,13 +161,19 @@
     border: none;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.1s;
-    white-space: nowrap; /* Prevent wrapping */
+    white-space: nowrap;
+    margin-top: 0.25rem; /* Space above button */
 }
-.answerButton:hover {
+.answerButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--color-button-neutral);
+}
+.answerButton:hover:not(:disabled) {
     background-color: var(--color-button-primary-hover);
     transform: translateY(-1px);
 }
-.answerButton:active {
+.answerButton:active:not(:disabled) {
     transform: translateY(1px);
 }
 
