@@ -1,73 +1,73 @@
 /* src/index.css */
 
-/* Define CSS Variables for consistent theming */
 :root {
-  --font-magic: 'MedievalSharp', Georgia, serif; /* Ensure MedievalSharp is linked in index.html */
-  --color-parchment: #fef3c7;
-  --color-wood-bg: #6b462a;
-  --color-text-dark: #1f2937; /* For text on light backgrounds */
-  --color-text-light: var(--color-parchment); /* For text on dark backgrounds */
+  /* Core Theme */
+  --font-magic: 'MedievalSharp', Georgia, serif;
+  --font-ui: 'Arial', sans-serif; /* Clearer font for UI elements */
+  --color-background: #a16207; /* Dark Yellow/Brownish Wood */
+  --color-workbench: #facc15; /* Brighter Yellow Wood for main area */
+  --color-parchment: #fefce8; /* Lighter Parchment */
+  --color-text-dark: #422006; /* Dark Brown */
+  --color-text-light: var(--color-parchment);
+  --color-text-accent: #ca8a04; /* Gold/Amber */
 
-  --color-cauldron-bg: #27272a;
-  --color-cauldron-border: #52525b;
-  --color-cauldron-content-bg: rgba(55, 65, 81, 0.7); /* Semi-transparent gray */
+  /* Cauldron */
+  --color-cauldron-bg: #3f3f46; /* Dark Zinc */
+  --color-cauldron-border: #71717a; /* Lighter Zinc */
+  --color-cauldron-content-bg: rgba(23, 23, 23, 0.5); /* Darker semi-transparent */
 
-  --color-stone-gold: #F59E0B;
+  /* Ingredients */
+  --color-stone-gold: #f59e0b;
   --color-glow-shroom: #10B981;
-  --color-moon-dew: #60a5fa; /* Blue for 'y' if used */
+  --color-moon-dew: #60a5fa;
 
-  --color-button-primary: #a3e635; /* Lime green */
-  --color-button-primary-hover: #84cc16;
-  --color-button-secondary: #f59e0b; /* Amber */
-  --color-button-secondary-hover: #d97706;
-  --color-button-danger: #ef4444; /* Red */
-  --color-button-danger-hover: #dc2626;
+  /* UI Elements */
+  --color-panel-bg: #eab308; /* Yellow/Gold Panel */
+  --color-panel-border: #ca8a04;
+  --color-button-add: #16a34a; /* Green */
+  --color-button-add-hover: #22c55e;
+  --color-button-sub: #ef4444; /* Red */
+  --color-button-sub-hover: #f87171;
+  --color-button-mult: #3b82f6; /* Blue */
+  --color-button-mult-hover: #60a5fa;
+  --color-button-div: #f97316; /* Orange */
+  --color-button-div-hover: #fb923c;
   --color-button-neutral: #6b7280; /* Gray */
-  --color-button-neutral-hover: #4b5563;
-  --color-button-text-dark: #111827;
+  --color-button-neutral-hover: #9ca3af;
+  --color-button-action: var(--color-panel-bg); /* Use panel color for Check/Next */
+  --color-button-action-hover: var(--color-panel-border);
+  --color-button-text-dark: #1f2937;
   --color-button-text-light: #ffffff;
 
-  --color-success-glow: rgba(163, 230, 53, 0.7);
-  --color-error-border: #ef4444;
+  /* Feedback */
+  --color-success-glow: rgba(132, 204, 22, 0.8); /* Lime */
+  --color-error-border: #dc2626; /* Darker Red */
 
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.15), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.15);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.1);
 }
 
 /* Basic Reset & Body Styles */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: var(--font-magic);
-  background-color: var(--color-wood-bg);
+  font-family: var(--font-ui); /* Default to UI font */
+  background-color: var(--color-background);
   color: var(--color-text-light);
   min-height: 100vh;
-  line-height: 1.6;
-  /* Optional: Add background texture */
-  /* background-image: url('/img/wood-texture.png'); */
-  /* background-repeat: repeat; */
+  line-height: 1.5;
+  background-image: url('/img/wood-texture-dark.png'); /* Optional darker texture */
+  background-repeat: repeat;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
-button {
-  font-family: inherit; /* Ensure buttons inherit font */
-  cursor: pointer;
-  border: none;
-  background-color: transparent;
-}
+button { font-family: inherit; cursor: pointer; border: none; background-color: transparent; }
+input { font-family: inherit; }
 
-input {
-   font-family: inherit;
-}
-
-/* Keyframe Animations (can be used by modules) */
+/* Keyframes for animations */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
@@ -75,12 +75,13 @@ input {
 }
 
 @keyframes subtleBubble {
-  0% { transform: translateY(0) scale(1); opacity: 0.6; }
-  50% { transform: translateY(-8px) scale(1.1); opacity: 0.8; }
-  100% { transform: translateY(-15px) scale(1.2); opacity: 0; }
+  0% { transform: translateY(0) scale(1); opacity: 0.5; }
+  50% { transform: translateY(-10px) scale(1.15); opacity: 0.7; }
+  99% { transform: translateY(-20px) scale(1.3); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 0; } /* Reset instantly */
 }
 
 @keyframes glow {
-   0%, 100% { box-shadow: 0 0 10px 3px var(--color-success-glow); }
-   50% { box-shadow: 0 0 20px 8px var(--color-success-glow); }
+   0%, 100% { box-shadow: 0 0 8px 2px var(--color-success-glow); }
+   50% { box-shadow: 0 0 18px 6px var(--color-success-glow); }
 }

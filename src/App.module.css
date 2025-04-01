@@ -1,67 +1,147 @@
 /* src/App.module.css */
+
 .appContainer {
+  font-family: var(--font-ui); /* Use UI font by default */
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  min-height: 100vh;
-  padding: 1rem; /* 16px */
-  gap: 1rem;
-  background-color: var(--color-bg-parchment);
+  padding: 1rem 1rem 8rem 1rem; /* Add padding bottom for fixed toolbar */
+  position: relative; /* For background decorations */
+  background-color: var(--color-background); /* Base background */
 }
 
-.loadingMessage {
-  margin: auto;
-  font-size: 1.5rem;
-  color: var(--color-text-light);
+/* Optional Background Decorations */
+.bgDecorationLeft, .bgDecorationRight {
+    position: absolute;
+    bottom: 0;
+    width: 150px; /* Adjust size */
+    height: 200px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.3;
+    z-index: 0;
 }
+.bgDecorationLeft {
+    left: 10px;
+    /* background-image: url('/img/shelf.png'); */ /* Example */
+}
+.bgDecorationRight {
+    right: 10px;
+    /* background-image: url('/img/bottles.png'); */ /* Example */
+}
+
 
 .mainTitle {
-  color: var(--color-heading);
-  font-size: 2rem;
-  text-shadow: var(--text-shadow);
-  margin-bottom: 0.5rem;
+  font-family: var(--font-magic); /* Use magic font for title */
+  font-size: 2.5rem;
+  line-height: 1.2;
+  font-weight: 700;
   text-align: center;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--color-text-accent);
+  text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.6);
+  z-index: 1; /* Above background decorations */
+}
+@media (min-width: 768px) { .mainTitle { font-size: 3.5rem; } }
+
+/* Main content area styling */
+.workbenchArea {
+    background-color: var(--color-workbench);
+    border-radius: 1rem;
+    padding: 1rem;
+    width: 100%;
+    max-width: 70rem; /* Wider max width */
+    margin: 0 auto;
+    box-shadow: var(--shadow-lg), inset 0 0 15px rgba(0,0,0,0.2);
+    border: 4px solid var(--color-text-dark);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items within workbench */
+}
+
+/* Row for Instructions and Level Indicator */
+.infoRow {
+    display: flex;
+    flex-direction: column; /* Stack on small screens */
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 60rem; /* Limit width of this row */
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+@media (min-width: 768px) {
+    .infoRow {
+        flex-direction: row; /* Side by side on larger screens */
+        justify-content: space-between;
+        align-items: flex-start; /* Align items to top */
+    }
 }
 
 .instructionsBox {
-  background: var(--color-parchment-light);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  font-style: italic;
-  text-align: center;
-  width: 100%;
-  max-width: 40rem;
-  margin-bottom: 0.5rem;
-  box-shadow: var(--shadow-sm);
+    padding: 0.5rem 1rem;
+    background-color: rgba(0, 0, 0, 0.1); /* Subtle dark on workbench */
+    border: 1px solid var(--color-panel-border);
+    border-radius: 0.375rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-text-dark); /* Dark text on workbench */
+    font-style: italic;
+    flex-grow: 1; /* Allow instructions to take more space */
+    max-width: 45rem; /* Limit instruction width */
 }
 
+/* Equation Display (Scroll style) */
 .equationDisplay {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  background-color: var(--color-parchment-light);
-  border: 2px solid var(--color-border);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
   width: 100%;
-  max-width: 40rem;
-  min-height: 4rem;
-  margin: 0.5rem 0;
-  box-shadow: var(--shadow-inner);
-  gap: 0.5rem 1rem; /* Row Column - handle wrapping better */
+  max-width: 50rem; /* Slightly narrower than workbench */
+  margin: 0.75rem 0;
+  padding: 0.75rem 1.5rem; /* More padding */
+  background-color: var(--color-parchment);
+  color: var(--color-text-dark);
+  border-radius: 0.5rem; /* Rounded ends */
+  box-shadow: var(--shadow-md);
+  border: 3px solid var(--color-text-dark);
+  min-height: 4.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative; /* For potential scroll ends */
 }
+/* Optional: Add pseudo-elements for scroll ends */
+.equationDisplay::before, .equationDisplay::after {
+    content: '';
+    position: absolute;
+    width: 15px; height: 100%;
+    background-color: var(--color-text-dark); /* Match border */
+    border-radius: 5px;
+    top: 0;
+}
+.equationDisplay::before { left: -10px; }
+.equationDisplay::after { right: -10px; }
+
 
 .equationSideContainer {
-  display: flex;
-  min-width: 40%;
-  flex-grow: 1;
-  justify-content: center;
+    flex-basis: 45%; 
+    display: flex; 
+    align-items: center;
+    overflow: hidden; 
+    min-height: 3rem;
 }
+.equationText {
+    font-size: 1.5rem; 
+    font-weight: 700; 
+    font-family: monospace;
+    letter-spacing: 0.05em; 
+    color: var(--color-text-dark); 
+    white-space: nowrap;
+}
+@media (min-width: 768px) { .equationText { font-size: 1.875rem; } }
 
-.visualEquationSide {
+.visualEquationSide { 
   display: flex;
   flex-wrap: wrap; /* Allow terms to wrap if needed */
   align-items: center; /* Align items vertically */
@@ -74,23 +154,16 @@
   display: inline-block;
   font-size: 1.75rem;
   font-weight: bold;
-  color: var(--color-heading);
-  line-height: 1;
-}
-
-.equationText {
-  font-family: monospace; /* Better for equation spacing */
-  font-size: 1.5rem;
   color: var(--color-text-dark);
-  font-weight: bold;
-  text-align: center;
-  line-height: 1.4;
+  line-height: 1;
+  margin: 0 0.5rem;
 }
 
+/* Reveal Button */
 .revealButtonContainer {
   margin: 0.5rem 0;
+  text-align: center;
 }
-
 .revealButton {
   background-color: var(--color-button-secondary);
   color: var(--color-button-text);
@@ -101,44 +174,61 @@
   font-weight: bold;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
+  transition: background-color 0.2s;
 }
 
-/* --- MODIFIED Styles for Answer Input Area --- */
+/* Cauldrons Container */
+.cauldronsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 60rem; /* Wider cauldron area */
+  gap: 1rem;
+  margin: 1rem 0;
+}
+@media (min-width: 768px) {
+  .cauldronsContainer { 
+    flex-direction: row; 
+    justify-content: center; 
+    gap: 2rem; /* Wider gap */
+  }
+}
+
+/* Answer Form */
 .answerForm {
-    display: flex;
-    flex-direction: column; /* Stack label, input, button vertically */
+    display: flex; 
+    flex-direction: column; 
     justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0.75rem 0; /* Adjusted margin */
-    width: 100%;
-    max-width: 28rem; /* Slightly wider */
-    transition: opacity 0.3s, visibility 0.3s; /* For hiding when correct */
+    align-items: center; 
+    gap: 0.5rem; 
+    margin: 0.75rem 0;
+    width: 100%; 
+    max-width: 28rem; 
+    transition: opacity 0.3s, visibility 0.3s;
 }
-
 .answerLabel {
-    font-size: 1rem;
-    font-weight: 500;
-    font-family: sans-serif;
+    font-size: 1rem; 
+    font-weight: 500; 
+    font-family: var(--font-ui); 
     color: var(--color-text-dark);
-    margin-bottom: 0.1rem;
+    margin-bottom: 0.1rem; 
     text-align: center;
     background-color: rgba(255, 255, 255, 0.5);
     padding: 0.25rem 0.75rem;
     border-radius: 0.25rem;
     box-shadow: var(--shadow-sm);
 }
-
 .answerInput {
-    padding: 0.6rem 0.8rem;
-    font-size: 1rem;
-    font-family: sans-serif;
-    border: 2px solid var(--color-cauldron-border);
+    padding: 0.6rem 0.8rem; 
+    font-size: 1rem; 
+    font-family: var(--font-ui);
+    border: 2px solid var(--color-cauldron-border); 
     border-radius: 0.375rem;
-    background-color: var(--color-parchment);
+    background-color: var(--color-parchment); 
     color: var(--color-text-dark);
-    text-align: center;
-    width: 100%; /* Take full width of form */
+    text-align: center; 
+    width: 100%; 
     box-shadow: var(--shadow-inner);
 }
 .answerInput:disabled {
@@ -150,81 +240,85 @@
     border-color: var(--color-stone-gold);
     box-shadow: 0 0 0 2px var(--color-stone-gold);
 }
-
 .answerButton {
     padding: 0.6rem 1.5rem; /* Wider button */
-    background-color: var(--color-button-primary);
-    color: var(--color-button-text-dark);
-    font-weight: 600;
+    background-color: var(--color-button-action);
+    color: var(--color-text-dark); 
+    font-weight: 700; 
     border-radius: 0.375rem;
-    box-shadow: var(--shadow-md);
-    border: none;
+    box-shadow: var(--shadow-md); 
+    border: none; 
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
+    transition: background-color 0.2s, transform 0.1s; 
     white-space: nowrap;
-    margin-top: 0.25rem; /* Space above button */
+    margin-top: 0.25rem;
 }
 .answerButton:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background-color: var(--color-button-neutral);
 }
-.answerButton:hover:not(:disabled) {
-    background-color: var(--color-button-primary-hover);
-    transform: translateY(-1px);
+.answerButton:hover:not(:disabled) { 
+    background-color: var(--color-button-action-hover); 
+    transform: translateY(-1px); 
 }
-.answerButton:active:not(:disabled) {
-    transform: translateY(1px);
-}
-
-.cauldronsContainer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: stretch;
-  gap: 1.5rem;
-  width: 100%;
-  margin: 1rem 0;
+.answerButton:active:not(:disabled) { 
+    transform: translateY(1px); 
 }
 
+/* Next Level / Completion */
 .controlsContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
+  padding-bottom: 1rem;
 }
-
 .nextLevelButton {
-  padding: 0.75rem 1.5rem;
-  background-color: var(--color-button-primary);
-  color: var(--color-button-text-dark);
-  border-radius: 0.375rem;
-  font-weight: bold;
-  font-size: 1.125rem;
-  border: none;
-  cursor: pointer;
-  box-shadow: var(--shadow-lg);
-  transition: transform 0.2s, background-color 0.2s;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--color-button-action);
+    color: var(--color-text-dark);
+    border-radius: 0.375rem;
+    font-weight: bold;
+    font-size: 1.125rem;
+    border: 2px solid var(--color-panel-border);
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: background-color 0.2s, transform 0.1s;
 }
-
-.nextLevelButton:hover {
-  background-color: var(--color-button-primary-hover);
+.nextLevelButton:hover { 
+    background-color: var(--color-button-action-hover);
+    transform: translateY(-2px);
 }
-
 .completionMessage {
-  background-color: var(--color-success-glow);
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
-  color: var(--color-text-light);
-  font-size: 1.25rem;
-  font-weight: bold;
-  text-shadow: var(--text-shadow-dark);
+    background-color: var(--color-success-glow);
+    padding: 1rem 2rem;
+    border-radius: 0.5rem;
+    color: var(--color-text-light);
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-md);
 }
 
+/* Footer */
 .footer {
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-  margin-top: 1.5rem;
+  margin-top: 1rem; /* Space above footer */
+  padding-top: 1rem;
   text-align: center;
+  color: var(--color-text-light); /* Light text on dark background */
+  opacity: 0.8;
+  font-size: 0.875rem;
+  width: 100%;
+  z-index: 1;
+}
+
+.loadingMessage {
+  margin: auto;
+  font-size: 1.5rem;
+  color: var(--color-text-light);
+  text-align: center;
+  padding: 2rem;
 }

@@ -1,24 +1,38 @@
 /* src/components/FeedbackDisplay.module.css */
 .feedbackContainer {
-  min-height: 2.5rem; /* 40px - Ensures space is reserved */
-  margin: 0.5rem 0;
+  width: 100%;
+  max-width: 50rem;
   text-align: center;
-  display: flex; /* Use flex to center content vertically */
-  justify-content: center;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.375rem;
+  min-height: 2rem;
+  display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .feedbackMessage {
-  font-size: 1.125rem; /* 18px */
-  font-weight: 600;
-  color: var(--color-text-light); /* Default color */
-  transition: color 0.3s ease; /* Smooth color transition */
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.25rem 1rem;
+  background-color: rgba(255, 255, 255, 0.35); /* Semi-transparent white background */
+  color: var(--color-text-dark); /* Dark text on workbench */
+  border-radius: 0.375rem;
+  transition: all 0.3s;
+  box-shadow: var(--shadow-sm);
 }
 
 .feedbackMessageSolved {
-  color: var(--color-stone-gold); /* Special color when solved */
+  color: #059669; /* Success Green */
+  font-weight: 700;
+  background-color: rgba(240, 253, 244, 0.7); /* Light green background */
+  border-left: 3px solid #10B981;
 }
 
 .feedbackMessageError {
-   color: var(--color-error-border); /* Red for errors */
+  color: var(--color-error-border);
+  font-weight: 700;
+  background-color: rgba(254, 226, 226, 0.7); /* Light red background */
+  border-left: 3px solid var(--color-error-border);
 }
